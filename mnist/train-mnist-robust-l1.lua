@@ -2,7 +2,7 @@
 
 -------------------------------------------------------------------------------------------------------
 
-
+-- This script trains a l_1 robustified net on MNIST
 ----------------------------------------------------------------------
 -- This script shows how to train different models on the MNIST 
 -- dataset, using multiple optimization techniques (SGD, LBFGS)
@@ -165,24 +165,17 @@ if opt.network == '' then
       -- convolutional network 
       ------------------------------------------------------------
       -- stage 1 : mean suppresion -> filter bank -> squashing -> max pooling
-      model:add(nn.SpatialBatchNormalization(1, nil, nil, false))
       model:add(nn.SpatialConvolutionMM(1, 32, 5, 5))
       model:add(nn.ReLU())
       model:add(nn.SpatialMaxPooling(3, 3, 3, 3))
-      -- model:add(nn.Dropout(opt.dropout_p))
       -- stage 2 : mean suppresion -> filter bank -> squashing -> max pooling
-      --model:add(nn.SpatialBatchNormalization(32, nil, nil, false))
       model:add(nn.SpatialConvolutionMM(32, 64, 5, 5))
       model:add(nn.ReLU())
       model:add(nn.SpatialMaxPooling(2, 2, 2, 2))
-      -- model:add(nn.Dropout(opt.dropout_p))
       -- stage 3 : standard 2-layer MLP:
-      --model:add(nn.SpatialBatchNormalization(64, nil, nil, false))
       model:add(nn.Reshape(64*2*2))
       model:add(nn.Linear(64*2*2, 200))
       model:add(nn.ReLU())
-      --model:add(nn.BatchNormalization(200, nil, nil, false))
-      -- model:add(nn.Dropout(opt.dropout_p))
       model:add(nn.Linear(200, #classes))
       ------------------------------------------------------------
 

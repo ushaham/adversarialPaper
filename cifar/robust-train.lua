@@ -16,6 +16,8 @@ opt = lapp[[
    --epoch_step               (default 25)          epoch step
    --model                    (default vgg_bn_drop)     model name
    --max_epoch                (default 300)           maximum number of iterations
+   --norm                     (default 'l_2')         type of uncertainty set
+   --intensity               (default .2)            radius of uncertainty set 
 ]]
 
 print(opt)
@@ -107,7 +109,7 @@ function train()
       gradParameters:zero()
       
       --robust training
-      inputs = adversarial_fast(model, criterion, inputs:clone(), targets, 1, 0.2, 'l_2') 
+      inputs = adversarial_fast(model, criterion, inputs:clone(), targets, 1, opt.intensity, opt.norm) 
       local outputs = model:forward(inputs)
       local f = criterion:forward(outputs, targets)
       local df_do = criterion:backward(outputs, targets)

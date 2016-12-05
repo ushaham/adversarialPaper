@@ -1,22 +1,9 @@
--- This script is based on https://github.com/torch/demos/blob/master/train-on-cifar/train-on-cifar.lua
+-- This script is based on https://github.com/torch/demos/blob/master/train-a-digit-classifier/train-on-mnist.lua
 
 -------------------------------------------------------------------------------------------------------
 
 ----------------------------------------------------------------------
--- This script shows how to train different models on the MNIST 
--- dataset, using multiple optimization techniques (SGD, LBFGS)
---
--- This script demonstrates a classical example of training 
--- well-known models (convnet, MLP, logistic regression)
--- on a 10-class classification problem. 
---
--- It illustrates several points:
--- 1/ description of the model
--- 2/ choice of a loss function (criterion) to minimize
--- 3/ creation of a dataset as a simple Lua table
--- 4/ description of training and test procedures
---
--- Clement Farabet
+-- This script trains a l_inf robustified net on MNIST
 ----------------------------------------------------------------------
 
 require 'torch'
@@ -71,8 +58,8 @@ require 'paths'
    cmd:option('model', 'convnet', 'type of model tor train: convnet | mlp | linear')
    cmd:option('numEpochs', 120, 'number ot training epochs')
    cmd:option('dropout_p', 0.5, 'dropout probability')
-   cmd:option('norm', 'l_2', 'uncertainty l-ball: l_inf | l_2 | l_1')
-   cmd:option('intensity', 2, 'radius of uncertainty ball')
+   cmd:option('norm', 'l_inf', 'uncertainty l-ball: l_inf | l_2 | l_1')
+   cmd:option('intensity', 0.2, 'radius of uncertainty ball')
    cmd:text()
    opt = cmd:parse(arg or {})
 --end
@@ -164,24 +151,17 @@ if opt.network == '' then
       -- convolutional network 
       ------------------------------------------------------------
       -- stage 1 : mean suppresion -> filter bank -> squashing -> max pooling
-      model:add(nn.SpatialBatchNormalization(1, nil, nil, false))
       model:add(nn.SpatialConvolutionMM(1, 32, 5, 5))
       model:add(nn.ReLU())
       model:add(nn.SpatialMaxPooling(3, 3, 3, 3))
-      -- model:add(nn.Dropout(opt.dropout_p))
       -- stage 2 : mean suppresion -> filter bank -> squashing -> max pooling
-      --model:add(nn.SpatialBatchNormalization(32, nil, nil, false))
       model:add(nn.SpatialConvolutionMM(32, 64, 5, 5))
       model:add(nn.ReLU())
       model:add(nn.SpatialMaxPooling(2, 2, 2, 2))
-      -- model:add(nn.Dropout(opt.dropout_p))
       -- stage 3 : standard 2-layer MLP:
-      --model:add(nn.SpatialBatchNormalization(64, nil, nil, false))
       model:add(nn.Reshape(64*2*2))
       model:add(nn.Linear(64*2*2, 200))
       model:add(nn.ReLU())
-      --model:add(nn.BatchNormalization(200, nil, nil, false))
-      -- model:add(nn.Dropout(opt.dropout_p))
       model:add(nn.Linear(200, #classes))
       ------------------------------------------------------------
 
@@ -378,7 +358,7 @@ function train(dataset)
    confusion:zero()
 
    -- save/log current net
-   local filename = paths.concat(opt.save, 'mnist.l_2.BN.net')
+   local filename = paths.concat(opt.save, 'mnist.l_inf.BN.net')
    os.execute('mkdir -p ' .. sys.dirname(filename))
    if paths.filep(filename) then
       os.execute('mv ' .. filename .. ' ' .. filename .. '.old')
@@ -457,4 +437,5 @@ while true do
       testLogger:plot()
    end
 end
--- this network has test accuracy of 99.29%, with intensity of 2
+
+-- this network has test accuracy of 99.34%, with intensity of 0.2

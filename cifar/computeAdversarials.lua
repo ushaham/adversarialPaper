@@ -2,7 +2,6 @@
 require 'nn'
 require 'image'
 function adversarial_fast(model, loss, x, y, std, intensity, norm)
-   --assert(loss.__typename == 'nn.ClassNLLCriterion')
    local intensity = intensity or 1
 
    -- consider x as batch
@@ -18,12 +17,7 @@ function adversarial_fast(model, loss, x, y, std, intensity, norm)
    end
 
    -- compute output
-   --print(x:size())
-   --print(x:type())
    local y_hat = model:updateOutput(x)
-   --print(y_hat:size())
-   --print(y:type())
-   --print(y:size())
    -- use predication as label if not provided
    local _, target = nil, y
    if target == nil then
@@ -33,10 +27,7 @@ function adversarial_fast(model, loss, x, y, std, intensity, norm)
    -- find gradient of input (inplace)
    model:training()
    local cost = loss:backward(y_hat, target)
-   --print(cost:size())
    local x_grad = model:updateGradInput(x, cost)
-   --print(x_grad:size())
-   --itorch.image(image.yuv2rgb(x_grad[1]))
    -- compute adversarial perturbation
    local noise = x_grad*0
    if norm == 'l_inf' then

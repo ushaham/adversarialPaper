@@ -1,7 +1,7 @@
--- This script is based on https://github.com/torch/demos/blob/master/train-on-cifar/train-on-cifar.lua
+-- This script is based on https://github.com/torch/demos/blob/master/train-a-digit-classifier/train-on-mnist.lua
 
 -------------------------------------------------------------------------------------------------------
-
+-- This script trains a baseline net on MNIST
 ----------------------------------------------------------------------
 -- This script shows how to train different models on the MNIST 
 -- dataset, using multiple optimization techniques (SGD, LBFGS)
@@ -161,12 +161,10 @@ if opt.network == '' then
       model:add(nn.SpatialConvolutionMM(1, 32, 5, 5))
       model:add(nn.ReLU())
       model:add(nn.SpatialMaxPooling(3, 3, 3, 3))
-      -- model:add(nn.Dropout(opt.dropout_p))
       -- stage 2 : mean suppresion -> filter bank -> squashing -> max pooling
       model:add(nn.SpatialConvolutionMM(32, 64, 5, 5))
       model:add(nn.ReLU())
       model:add(nn.SpatialMaxPooling(2, 2, 2, 2))
-      -- model:add(nn.Dropout(opt.dropout_p))
       -- stage 3 : standard 2-layer MLP:
       model:add(nn.Reshape(64*2*2))
       model:add(nn.Linear(64*2*2, 200))
